@@ -1,41 +1,41 @@
-PostgreSQL�Ƀo�b�N�A�b�v�̊J�n�E�I����ʒm����֐���pg_start_backup()��pg_stop_backup()
+PostgreSQLにバックアップの開始・終了を通知する関数はpg_start_backup()とpg_stop_backup()
 
 
-pg_start_backup()�̓`�F�b�N�|�C���g�̎��s���s��
-�`�F�b�N�|�C���g�́A�f�[�^�̕ύX���f�B�X�N�ɔ��f���鏈��
-(��PostgreSQL�ł́A�f�[�^�̕ύX���Ƀf�B�X�N��̃f�[�^���X�V�����A���L��������̋��L�o�b�t�@�Ƃ����̈�
-�ɓǂݍ��񂾃f�[�^���X�V����B���̌�A���L�o�b�t�@�̓��e���܂Ƃ߂ăf�B�X�N��̃f�[�^�t�@�C���֏������ރ`�F�b�N�|�C���g�Ƃ����������s�����ƂŁA�X�V���̃p�t�H�[�}���X�����コ���Ă���)
+pg_start_backup()はチェックポイントの実行も行う
+チェックポイントは、データの変更をディスクに反映する処理
+(※PostgreSQLでは、データの変更時にディスク上のデータを更新せず、共有メモリ上の共有バッファという領域
+に読み込んだデータを更新する。その後、共有バッファの内容をまとめてディスク上のデータファイルへ書き込むチェックポイントという処理を行うことで、更新時のパフォーマンスを向上させている)
 
-pg_start_backup()�̃`�F�b�N�|�C���g���s�ɂ���āA���J�o�����ɓK�p����ׂ�WAL(���O��s��������: write ahead logging)�̏�񂪋L�^�����
+pg_start_backup()のチェックポイント実行によって、リカバリ時に適用するべきWAL(ログ先行書き込み: write ahead logging)の情報が記録される
 
 
-�ʒm�֐����g�p�����o�b�N�A�b�v�̏����́A�ȉ�
-1.	SELECT����pg_start_backup()�֐����Ăяo��
-		SELECT pg_start_backup('���x����');
+通知関数を使用したバックアップの所得は、以下
+1.	SELECT文でpg_start_backup()関数を呼び出す
+		SELECT pg_start_backup('ラベル名');
 
-2.	�f�[�^�x�[�X�N���X�^�S�̂̕����o�b�N�A�b�v����������
+2.	データベースクラスタ全体の物理バックアップを所得する
 
-3.	SELECT����pg_stop_backup()�֐����Ăяo��
+3.	SELECT文でpg_stop_backup()関数を呼び出す
 		SELECT pg_stop_backup();
 		
 		
-createuser�R�}���h
-	PostgreSQL�̐V�������[�U�A�J�E���g���`����
+createuserコマンド
+	PostgreSQLの新しいユーザアカウントを定義する
 	
 	-P	--pwprompt
 	
 		
-SQL�́A�傫��������
-	DDL	�f�[�^��`����
-	DML	�f�[�^���쌾��
-	DCL	�f�[�^���䌾��
+SQLは、大きく分けて
+	DDL	データ定義言語
+	DML	データ操作言語
+	DCL	データ制御言語
 	
 	
 	DDL
-		�f�[�^��`����
+		データ定義言語
 		Data Definition Language
-		�f�[�^�\����֌W�̒�`�Ɋւ������
-		�e�[�u���ɑ΂��鐧��Ȃ�
+		データ構造や関係の定義に関するもの
+		テーブルに対する制御など
 		
 		CREATE
 		DROP
@@ -44,9 +44,9 @@ SQL�́A�傫��������
 		
 		
 	DML
-		�f�[�^���쌾��
+		データ操作言語
 		Data Manipulation Language
-		�f�[�^�̑���Ɋւ������
+		データの操作に関するもの
 		
 		SELECT
 		INSERT
@@ -54,67 +54,67 @@ SQL�́A�傫��������
 		DELETE
 		
 	DCL
-		�f�[�^���䌾��
+		データ制御言語
 		Data Control Language
-		�V�X�e���̊Ǘ��␧��Ɋւ������
+		システムの管理や制御に関するもの
 		
-		GRANT	����	�f�[�^�ɑ΂���A�N�Z�X�����̕t�^
-		REVOKE	����	�A�N�Z�X�����̎�����
-		BEGIN	�g�����U�N�V����
+		GRANT	権限	データに対するアクセス権限の付与
+		REVOKE	権限	アクセス権限の取り消し
+		BEGIN	トランザクション
 		COMMIT
 		ROLLBACK
 		
 		
 		
-���X�L�[�}
-	�f�[�^�x�[�X�N���X�^�Ɋւ�����̊m�F�Ɏg�p����d�g��
+情報スキーマ
+	データベースクラスタに関する情報の確認に使用する仕組み
 	
-	�f�[�^�x�[�X�I�u�W�F�N�g�Ɋւ����`�����܂ރX�L�[�}���w��(�e�[�u���Ȃǂ̃I�u�W�F�N�g���i�[���Ă��閼�O���)
+	データベースオブジェクトに関する定義情報を含むスキーマを指す(テーブルなどのオブジェクトを格納している名前空間)
 	
-	�X�[�p�[���[�U�ɏ��L�����A�r���[�ƃe�[�u���̃O���[�v�ł���ASQL�̕W���K�i�ɓ��Ă͂܂邽�߂ɈڐA��������
+	スーパーユーザに所有される、ビューとテーブルのグループであり、SQLの標準規格に当てはまるために移植性が高い
 	
-	�Q�Ƃɓ��ʂȐݒ�⌠���͕s�v
+	参照に特別な設定や権限は不要
 	
 	
 	
 	
 
-�f�[�^�x�[�X���̃I�u�W�F�N�g�Ɋւ�������Ǘ����Ă�����̂ɂ́A�V�X�e���J�^���O�Ə��X�L�[�}������
+データベース内のオブジェクトに関する情報を管理しているものには、システムカタログと情報スキーマがある
 
 
-�V�X�e���J�^���O
-	�V�X�e���J�^���O�Ƃ͓����I�ȏ����i�[����e�[�u����r���[
+システムカタログ
+	システムカタログとは内部的な情報を格納するテーブルやビュー
 	
-���X�L�[�}
-	
-	
+情報スキーマ
 	
 	
-�O���L�[����
-	�Q�ƃe�[�u���ɑ��݂��Ȃ��l���i�[�����Ȃ�����
-	�O���L�[�����ݒ肷��ƁA�Q�Ɛ�̃e�[�u���ƃf�[�^�̐�������S�ۂ��邱�Ƃ��ł���
-	�Q�Ɛ�������
 	
-	�O���L�[�ƂȂ�J�����ɂ͎�L�[���񂩃��j�[�N���񂪐ݒ肳��Ă���K�v������
-	���j�[�N����ł����NULL����
+	
+外部キー制約
+	参照テーブルに存在しない値を格納させない制約
+	外部キー制約を設定すると、参照先のテーブルとデータの整合性を担保することができる
+	参照整合成約
+	
+	外部キーとなるカラムには主キー制約かユニーク制約が設定されている必要がある
+	ユニーク制約であればNULLも可
 	
 	REFERENCES
 	FOREIGN KEY
-	���g�p����
+	を使用する
 	
-PostgreSQL�ł̃o�b�N�A�b�v
+PostgreSQLでのバックアップ
 
-	PostgreSQL�ɂ́A�����o�b�N�A�b�v�Ƙ_���o�b�N�A�b�v������
+	PostgreSQLには、物理バックアップと論理バックアップがある
 	
-	�����o�b�N�A�b�v
-		�I�t���C����tar��rsync�R�}���h�ɂ��f�B���N�g���R�s�[���s�����@��
-		�I�����C����pg_basebackup�R�}���h���g�p������@�Ȃǂ�����
+	物理バックアップ
+		オフラインでtarやrsyncコマンドによるディレクトリコピーを行う方法や
+		オンラインでpg_basebackupコマンドを使用する方法などがある
 		
-		�f�[�^�x�[�X����ۑ������f�[�^�t�@�C���𒼐ڎg�p����o�b�N�A�b�v���@
-			��PostgreSQL�̃��W���[�o�[�W�������قȂ�ꍇ�̓��X�g�A�ł��Ȃ�
+		データベース情報を保存したデータファイルを直接使用するバックアップ方法
+			→PostgreSQLのメジャーバージョンが異なる場合はリストアできない
 			
-	�_���o�b�N�A�b�v
-		pg_dump�Apg_dumpall�R�}���h���g�p����
-		�f�[�^�񍞂݂��������邽�߁APostgreSQL�̃��W���[�o�[�W�������قȂ�ꍇ�ł����X�g�A�ł���
+	論理バックアップ
+		pg_dump、pg_dumpallコマンドを使用する
+		データん込みを所得するため、PostgreSQLのメジャーバージョンが異なる場合でもリストアできる
 		
 		
