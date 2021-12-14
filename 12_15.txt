@@ -1,0 +1,6 @@
+PostgresでのBOOLEAN BOOL
+
+	・サイズ	1バイト
+	・真偽またはNULLを格納
+	・真　t true y yes on 1 TRUE
+	・偽　f false n no off 0 FALSE
